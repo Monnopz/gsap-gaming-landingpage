@@ -2,6 +2,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import type { Ref, ComputedRef } from 'vue';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/all';
 
 import Button from './Button.vue';
 
@@ -58,6 +59,24 @@ const initAnimateVideoCenterCtx = ():void => {
     }, '#hero-parent');
 }
 
+const clipPathVideoFrame = ():void => {
+    gsap.set('#video-frame', {
+        clipPath: 'polygon(14% 0%, 72% 0%, 90% 100%, 0% 100%)',
+        borderRadius: '0 0 40% 10%'
+    })
+    gsap.from('#video-frame', {
+        clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+        borderRadius: '0 0 0 0',
+        ease: 'power1.inOut',
+        scrollTrigger: {
+            trigger: '#video-frame',
+            start: 'center center',
+            end: 'bottom center',
+            scrub: true
+        }
+    })
+}
+
 watch(() => currentIndex.value, (_) => {
     if(gsapVideoCenterCtx) {
         gsapVideoCenterCtx.revert() // Reinicia las animaciones agrupadas
@@ -69,17 +88,26 @@ onMounted(() => {
     if(!gsapVideoCenterCtx) { // Si el contexto de animacion es nulo, iniciarlo
         initAnimateVideoCenterCtx()
     }
+    clipPathVideoFrame()
 })
 
 onUnmounted(() => {
     gsapVideoCenterCtx?.kill() // Limpieza de animaciones al desmontar el componente
+    ScrollTrigger.getAll()?.forEach(t => t.kill()) // Termina todas las instancias de scrollTrigger
 })
 
 </script>
 
 <template>
     <div id="hero-parent" class="relative h-dvh w-dvw overflow-x-hidden">
-        <div id="video-frame" class="relative z-10 h-dvh w-dvw overflow-hidden rounded-lg bg-blue-75">
+        <div v-show="isLoading" class="flex-center absolute z-100 h-dvh w-dvw overflow-hidden bg-violet-50">
+            <div class="three-body">
+                <div class="three-body__dot"></div>
+                <div class="three-body__dot"></div>
+                <div class="three-body__dot"></div>
+            </div>
+        </div>
+        <div v-show="!isLoading" id="video-frame" class="relative z-10 h-dvh w-dvw overflow-hidden rounded-lg bg-blue-75">
             <div>
                 <div class="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
                     <div @click="handleMiniVdClick" class="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100">
