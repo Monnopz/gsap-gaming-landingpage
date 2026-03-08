@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import type { Ref, ComputedRef } from 'vue';
+import gsap from 'gsap';
 
 import Button from './Button.vue';
 
+
 const _TOTALVIDEOS:number = 3;
+let gsapVideoCenterCtx:gsap.Context | null = null
 
 const currentIndex:Ref<number> = ref(1);
 const hasClicked:Ref<boolean> = ref(false);
@@ -15,11 +18,6 @@ const nextVideoRef:Ref<any> = ref(null);
 
 const upcomingVideoIndex = (cIndex:number):number => ( cIndex % _TOTALVIDEOS ) + 1;
 
-const handleMiniVdClick = ():void => {
-    hasClicked.value = true;
-    currentIndex.value = upcomingVideoIndex(currentIndex.value);
-};
-
 const getVideoSrc = (index:number):string => `videos/hero-${index}.mp4`;
 
 const handleVideoLoad = ():number => loadedVideos.value = loadedVideos.value + 1
@@ -27,10 +25,60 @@ const handleVideoLoad = ():number => loadedVideos.value = loadedVideos.value + 1
 // Variable computada que devuelve el indice del video que sera reproducido en background 
 const getVideoSrcPlayable:ComputedRef<number> = computed(() => currentIndex.value === _TOTALVIDEOS - 1 ? 1 : currentIndex.value)
 
+const handleMiniVdClick = ():void => {
+    if(nextVideoRef.value) {
+        hasClicked.value = true;
+        currentIndex.value = upcomingVideoIndex(currentIndex.value);
+    }
+};
+
+// Inicializacion del contexto de video
+const initAnimateVideoCenterCtx = ():void => {
+    gsapVideoCenterCtx = gsap.context((self) => { // El contexto almacena un grupo de animaciones de manera que facilita labores como limpieza o kill de instancia
+        self.add('onClick', (_:any, video:any) => { // onClick puede ser un nombre arbitrario. No apunta directamente a un evento HTML/Javascript
+            gsap.set('#next-video', { visibility: 'visible' })
+
+            gsap.to('#next-video', {
+                transformOrigin: 'center center',
+                scale: 1,
+                width: '100%',
+                height: '100%',
+                duration: 1,
+                ease: 'power1.inOut',
+                onStart: () => video?.play()
+            })
+
+            gsap.from('#current-video', {
+                transformOrigin: 'center center',
+                scale: 0,
+                duration: 1.5,
+                ease: 'power1.inOut'
+            })
+        })
+    }, '#hero-parent');
+}
+
+watch(() => currentIndex.value, (_) => {
+    if(gsapVideoCenterCtx) {
+        gsapVideoCenterCtx.revert() // Reinicia las animaciones agrupadas
+        gsapVideoCenterCtx.onClick(_, nextVideoRef.value) // Ejecuta el metodo creado al inicializar la instancia 
+    }
+})
+
+onMounted(() => {
+    if(!gsapVideoCenterCtx) { // Si el contexto de animacion es nulo, iniciarlo
+        initAnimateVideoCenterCtx()
+    }
+})
+
+onUnmounted(() => {
+    gsapVideoCenterCtx?.kill() // Limpieza de animaciones al desmontar el componente
+})
+
 </script>
 
 <template>
-    <div class="relative h-dvh w-dvw overflow-x-hidden">
+    <div id="hero-parent" class="relative h-dvh w-dvw overflow-x-hidden">
         <div id="video-frame" class="relative z-10 h-dvh w-dvw overflow-hidden rounded-lg bg-blue-75">
             <div>
                 <div class="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
@@ -38,7 +86,7 @@ const getVideoSrcPlayable:ComputedRef<number> = computed(() => currentIndex.valu
                         <video ref="nextVideoRef" :src="getVideoSrc(upcomingVideoIndex(currentIndex))" loop muted id="current-video" class="size-64 origin-center scale-150 object-cover object-center" @loadeddata="handleVideoLoad" ></video>
                     </div>
                 </div>
-                <video ref="nextVideoRef" :src="getVideoSrc(currentIndex)" lopp muted id="next-video" class="absolute-center invisible absolute z-20 size-64 object-cover object-center" @loadeddata="handleVideoLoad"></video>
+                <video ref="nextVideoRef" :src="getVideoSrc(currentIndex)" loop muted id="next-video" class="absolute-center invisible absolute z-20 size-64 object-cover object-center" @loadeddata="handleVideoLoad"></video>
                 <video :src="getVideoSrc(getVideoSrcPlayable)" autoplay loop muted class="absolute left-0 top-0 size-full object-cover object-center" @loadeddata="handleVideoLoad"></video>
             </div>
             <h1 class="special-font hero-heading absolute bottom-5 right-5 z-40 text-blue-75">
