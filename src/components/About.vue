@@ -3,6 +3,8 @@ import { onMounted, onUnmounted } from 'vue';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/all';
 
+import AnimatedTitle from './AnimatedTitle.vue';
+
 
 const initClipAnimation = ():void => {
     const clipAnimation = gsap.timeline({
@@ -36,8 +38,7 @@ onUnmounted(() => {
     <div id="about" class="min-h-dvh min-w-dvw">
         <div class="relative mb-8 mt-36 flex flex-col items-center gap-5">
             <h2 class="font-general text-sm uppercase md:text-[0.625rem]">Welcome to Zentry</h2>
-            <div class="mt-5 text-center text-4xl uppercase leading-[0.8] md:text-[6rem]">Disc<b>o</b>ver the world's <br /> l<b>a</b>rgest shared
-            </div>
+            <AnimatedTitle :title="`Disc<b>o</b>ver the world's<br />l<b>a</b>rgest shared`" :container-class="'mt-5 !text-black !text-center'" />
             <div class="about-subtext">
                 <p>The Game of Games begins-your life, now an epic MMORPG</p>
                 <p>Zentry unites every player from countless games and platforms</p>
