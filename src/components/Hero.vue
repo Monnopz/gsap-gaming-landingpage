@@ -7,7 +7,7 @@ import { ScrollTrigger } from 'gsap/all';
 import Button from './Button.vue';
 
 
-const _TOTALVIDEOS:number = 3;
+const _TOTALVIDEOS:number = 4;
 let gsapVideoCenterCtx:gsap.Context | null = null
 
 const currentIndex:Ref<number> = ref(1);
@@ -81,6 +81,12 @@ watch(() => currentIndex.value, (_) => {
     if(gsapVideoCenterCtx) {
         gsapVideoCenterCtx.revert() // Reinicia las animaciones agrupadas
         gsapVideoCenterCtx.onClick(_, nextVideoRef.value) // Ejecuta el metodo creado al inicializar la instancia 
+    }
+})
+
+watch(() => loadedVideos.value, (newLoadedVideo) => {
+    if(newLoadedVideo === (_TOTALVIDEOS - 1)) {
+        isLoading.value = false
     }
 })
 
