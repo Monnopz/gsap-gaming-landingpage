@@ -121,7 +121,7 @@ onUnmounted(() => {
                     </div>
                 </div>
                 <video ref="nextVideoRef" :src="getVideoSrc(currentIndex)" loop muted id="next-video" class="absolute-center invisible absolute z-20 size-64 object-cover object-center" @loadeddata="handleVideoLoad"></video>
-                <video :src="getVideoSrc(getVideoSrcPlayable)" autoplay loop muted class="absolute left-0 top-0 size-full object-cover object-center" @loadeddata="handleVideoLoad"></video>
+                <video :src="getVideoSrc(getVideoSrcPlayable)" loop muted class="absolute left-0 top-0 size-full object-cover object-center" @loadeddata="handleVideoLoad"></video>
             </div>
             <h1 class="special-font hero-heading absolute bottom-5 right-5 z-40 text-blue-75">
                 G<b>a</b>ming

@@ -16,9 +16,9 @@ const { id = '', title = '', rightIcon = '', leftIcon = '', containerClass = '' 
 
 <template>
     <button :id :class="`group relative z-10 w-fit cursor-pointer overflow-hidden rounded-full bg-violet-50 px-7 py-3 text-black ${containerClass}`">
-        <Icon :icon="leftIcon" width="24" height="24" />
+        <Icon v-if="leftIcon" :icon="leftIcon" width="24" height="24" />
         <span class="relative inline-flex overflow-hidden font-general text-xs uppercase">{{ title }}</span>
-        <Icon :icon="rightIcon" width="24" height="24" />
+        <Icon v-if="rightIcon" :icon="rightIcon" width="24" height="24" />
     </button>
 </template>
 
